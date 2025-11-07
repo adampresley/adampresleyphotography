@@ -23,10 +23,7 @@ LABEL org.opencontainers.image.source=https://github.com/adampresley/adampresley
 
 WORKDIR /dist
 
-RUN mkdir -p /dist/sql-migrations
-
 # Copy the build artifacts from the previous stage
-COPY --from=builder /build/sql-migrations ./sql-migrations
 COPY --from=builder /build/cmd/website/adampresleyphotography .
 
 # Run the executable

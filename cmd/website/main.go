@@ -4,6 +4,7 @@ import (
 	"context"
 	"embed"
 	"encoding/gob"
+	"io/fs"
 	"log/slog"
 	"net/http"
 	"os"
@@ -35,6 +36,9 @@ var (
 
 	//go:embed app
 	appFS embed.FS
+
+	//go:embed sql-migrations
+	sqlMigrationsFs embed.FS
 
 	config configuration.Config
 
@@ -250,11 +254,11 @@ func heartbeat(w http.ResponseWriter, r *http.Request) {
 func migrateDatabase() {
 	var (
 		err  error
-		dirs []os.DirEntry
+		dirs []fs.DirEntry
 		b    []byte
 	)
 
-	if dirs, err = os.ReadDir(config.DataMigrationDir); err != nil {
+	if dirs, err = sqlMigrationsFs.ReadDir("sql-migrations"); err != nil {
 		panic(err)
 	}
 
@@ -264,7 +268,7 @@ func migrateDatabase() {
 		}
 
 		if strings.HasPrefix(d.Name(), "commit") {
-			if b, err = os.ReadFile(filepath.Join(config.DataMigrationDir, d.Name())); err != nil {
+			if b, err = fs.ReadFile(sqlMigrationsFs, filepath.Join("sql-migrations", d.Name())); err != nil {
 				panic(err)
 			}
 
