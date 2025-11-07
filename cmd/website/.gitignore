@@ -1,0 +1,7 @@
+data/adampresleyphotography.db
+app/static/photos/*.jpg
+app/static/photos/*.jpeg
+app/static/photos/*.png
+downloads/*.zip
+cache/*
+!cache/.gitkeep

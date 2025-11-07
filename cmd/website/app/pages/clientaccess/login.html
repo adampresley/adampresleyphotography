@@ -1,0 +1,25 @@
+{{if .IsHtmx}}
+{{template "no-layout" .}}
+{{else}}
+{{template "layouts/clientlayout" .}}
+{{end}}
+
+{{define "title"}}Login{{end}}
+{{define "content"}}
+
+<h2>Login</h2>
+
+{{template "components/display-messages" .}}
+
+<form method="POST" action="/client/login" name="form" id="form">
+   <fieldset>
+      <label>
+         Password:
+         <input name="password" id="password" type="password" required maxlength="128" />
+      </label>
+   </fieldset>
+
+   <button>Log In</button>
+</form>
+
+{{end}}

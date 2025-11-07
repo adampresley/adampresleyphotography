@@ -1,0 +1,60 @@
+{{if .IsHtmx}}
+{{template "no-layout" .}}
+{{else}}
+{{template "layouts/clientlayout" .}}
+{{end}}
+
+{{define "title"}}View Album{{end}}
+{{define "content"}}
+
+{{template "components/display-messages" .}}
+
+<section class="hero-image"
+   style="background-image: linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)), url('{{.Album.PosterImageURL}}');{{if .Album.PosterYPos}} background-position-y: {{.Album.PosterYPos}}{{end}}">
+   <div class="hero-text">
+      <h2>{{.Album.Name}}</h2>
+   </div>
+</section>
+
+<section id="download-bar">
+   <a hx-get="/client" hx-push-url="true" hx-target="#mainContent" role="button">
+      Back
+   </a>
+   <a href="/client/library/{{.Album.ID}}/download-all" role="button">
+      Download All
+   </a>
+   <br />
+   <small>
+      When downloading, please be patient. Please note that the images
+      below are thumbnails. For high quality, download the album using the button
+      above of the download icon for individual images.
+   </small>
+</section>
+
+<section class="gallery">
+   {{range .Album.ImageURLs}}
+   <div class="frame">
+      <div class="actions">
+         <a href="/client/download-image?key={{.OriginalKey}}" alt="Download image" title="Download image">
+            <i class="icon icon-download"></i>
+         </a>
+
+         <a hx-put="/client/library/{{$.Album.ID}}/toggle-favorite?key={{.OriginalKey}}"
+            alt="{{if .IsFavorite}}Un-favorite{{else}}Favorite{{end}} image"
+            title="{{if .IsFavorite}}Un-favorite{{else}}Favorite{{end}} image" hx-swap="innerHTML">
+            {{if .IsFavorite}}
+            <i class="icon icon-heart"></i>
+            {{else}}
+            <i class="icon icon-empty-heart"></i>
+            {{end}}
+         </a>
+      </div>
+
+      <a data-fslightbox href="{{.OriginalURL}}">
+         <img src="{{.ThumbnailURL}}" />
+      </a>
+   </div>
+   {{end}}
+</section>
+
+{{end}}

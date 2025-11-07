@@ -1,0 +1,33 @@
+{{if .IsHtmx}}
+{{template "no-layout" .}}
+{{else}}
+{{template "layouts/clientlayout" .}}
+{{end}}
+
+{{define "title"}}Download Started{{end}}
+{{define "content"}}
+
+<h2>Download Started</h2>
+
+{{template "components/display-messages" .}}
+
+<section>
+   <article class="success">
+      Your download for <strong>{{.Album.Name}}</strong> is being prepared.
+      You will receive an email at <strong>{{.Client.Email}}</strong> when your download is ready.
+      This may take several minutes depending on the size of the album.
+   </article>
+</section>
+
+<section>
+   <div role="group">
+      <a hx-get="/client/{{.Album.ID}}" hx-push-url="true" hx-target="#mainContent" role="button">
+         Return to Album
+      </a>
+      <a hx-get="/client" hx-push-url="true" hx-target="#mainContent" role="button">
+         Back to Albums
+      </a>
+   </div>
+</section>
+
+{{end}}

@@ -1,0 +1,36 @@
+{{if .IsHtmx}}
+{{template "no-layout" .}}
+{{else}}
+{{template "layouts/layout" .}}
+{{end}}
+
+{{define "title"}}Settings{{end}}
+{{define "content"}}
+
+<h2>Settings</h2>
+
+{{template "components/display-messages" .}}
+
+<form method="POST" hx-post="/settings" hx-trigger="submit" hx-target="#mainContent">
+   <fieldset>
+      <label>
+         Library path:
+         <input type="text" name="libraryPath" id="libraryPath" maxlength="512" value="{{.Settings.LibraryPath}}" />
+      </label>
+
+      <label>
+         Sync frequency:
+         <div class="group">
+            <input type="number" name="syncFrequency" id="syncFrequency" min="1" value="{{.Settings.SyncFrequency}}" />
+            <select name="syncFrequencyUnit" id="syncFrequencyUnit" autocomplete="off">
+               <option value="minute" {{if eq .Settings.SyncFrequencyUnit "minute" }}selected{{end}}>Minutes</option>
+               <option value="hour" {{if eq .Settings.SyncFrequencyUnit "hour" }}selected{{end}}>Hours</option>
+            </select>
+         </div>
+      </label>
+   </fieldset>
+
+   <button>Save</button>
+</form>
+
+{{end}}

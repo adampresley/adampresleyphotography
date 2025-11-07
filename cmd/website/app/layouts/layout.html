@@ -1,0 +1,38 @@
+{{- define "layouts/layout"}}
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+   <meta charset="UTF-8">
+   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+   <title>Adam Presley Photography</title>
+   <link type="text/css" rel="stylesheet" media="screen" href="/static/css/pico.min.css" />
+   <link type="text/css" rel="stylesheet" media="screen" href="/static/css/styles.css" />
+   {{stylesheetIncludes "Stylesheets" .}}
+</head>
+
+<body>
+   <header>
+      <h1>
+         <img src="/static/images/logo.png" alt="Adam Presley Photography logo" />
+      </h1>
+      <p>Capturing moments, one frame at a time.</p>
+   </header>
+
+   <main class="container">
+      <main id="mainContent">
+         {{template "content" .}}
+      </main>
+
+      <section id="contact">
+         <h2>Contact</h2>
+         <p>Email: <a href="mailto:adam@adampresley.com">adam@adampresley.com</a></p>
+      </section>
+   </main>
+
+   <script src="https://cdnjs.cloudflare.com/ajax/libs/fslightbox/3.4.1/index.min.js"></script>
+   {{javascriptIncludes "JavascriptIncludes" .}}
+</body>
+
+</html>
+{{end}}

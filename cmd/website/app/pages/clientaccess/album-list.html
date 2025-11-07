@@ -1,0 +1,46 @@
+{{if .IsHtmx}}
+{{template "no-layout" .}}
+{{else}}
+{{template "layouts/clientlayout" .}}
+{{end}}
+
+{{define "title"}}Albums{{end}}
+{{define "content"}}
+
+<h2>Welcome {{.Client.Name}}</h2>
+
+{{template "components/display-messages" .}}
+
+{{if not (len .Albums)}}
+
+<p>You do not have any photo albums to view yet!</p>
+
+{{else}}
+
+<section id="albumList">
+   {{range .Albums}}
+   <article>
+      <header>{{.Name}}</header>
+
+      <a hx-get="/client/{{.ID}}" hx-push-url="true" hx-target="#mainContent">
+         <img src="{{.PosterImageURL}}" alt="{{.Name}}" />
+      </a>
+
+      <footer>
+         <a hx-get="/client/{{.ID}}" hx-push-url="true" hx-target="#mainContent" role="button">
+            View Album
+         </a>
+
+         <a href="/client/library/{{.ID}}/download-all" role="button">
+            Download All
+         </a>
+         <br />
+         <small>When downloading, please be patient</small>
+      </footer>
+   </article>
+   {{end}}
+</section>
+
+{{end}}
+
+{{end}}

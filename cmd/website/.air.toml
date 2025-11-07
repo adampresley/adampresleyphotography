@@ -1,0 +1,39 @@
+# Working directory
+# . or absolute path, please note that the directories following must be under root.
+root = "."
+tmp_dir = "tmp"
+
+[build]
+cmd = "go build -o ./tmp/adampresleyphotography ./*.go"
+bin = "tmp/adampresleyphotography"
+include_ext = ["go", "tpl", "tmpl", "html", "css", "js"]
+exclude_dir = ["tmp"]
+exclude_regex = ["_test\\.go"]
+exclude_unchanged = true
+follow_symlink = true
+log = "air.log"
+poll = false
+stop_on_error = true
+send_interrupt = true
+kill_delay = 500 # nanosecond
+rerun = false
+rerun_delay = 500
+
+[log]
+time = false
+main_only = false
+
+[color]
+main = "magenta"
+watcher = "cyan"
+build = "yellow"
+runner = "green"
+
+[misc]
+# Delete tmp directory on exit
+clean_on_exit = true
+
+[screen]
+clear_on_rebuild = true
+keep_scroll = true
+

@@ -1,0 +1,9 @@
+.DS_Store
+.ThumbDB
+.env.production
+.env
+pusher.yaml
+tmp
+adampresleyphotography
+*.tar
+mise.local.toml

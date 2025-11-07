@@ -1,0 +1,29 @@
+{{if .IsHtmx}}
+{{template "no-layout" .}}
+{{else}}
+{{template "layouts/layout" .}}
+{{end}}
+
+{{define "title"}}Home{{end}}
+{{define "content"}}
+
+{{template "components/display-messages" .}}
+
+<section id="bio">
+   <h2>About Me</h2>
+   <p>
+      I'm Adam Presley, a passionate photographer specializing in headshots and
+      senior portraits. My goal is to create timeless images that capture <strong>you</strong>.
+   </p>
+</section>
+
+<section id="gallery">
+   <h2>Portfolio</h2>
+   <div class="gallery">
+      {{range .Photos}}
+      <a data-fslightbox="gallery" href="{{.OriginalPath}}"><img src="{{.ThumbnailPath}}" alt="{{.FileName}}" /></a>
+      {{end}}
+   </div>
+</section>
+
+{{end}}

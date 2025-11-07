@@ -1,0 +1,17 @@
+processes:
+  adampresleyphotography:
+    command: air
+    namespace: http:8081
+    working_dir: ./cmd/website
+    readiness_probe:
+      http_get:
+        host: localhost
+        port: 8081
+        scheme: http
+        path: /heartbeat
+    liveness_probe:
+      http_get:
+        host: localhost
+        port: 8081
+        scheme: http
+        path: /heartbeat

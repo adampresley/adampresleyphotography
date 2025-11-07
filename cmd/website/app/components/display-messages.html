@@ -1,0 +1,9 @@
+{{define "components/display-messages"}}
+
+{{if len .Message}}
+<article class="{{if .IsError}}error{{else if .IsWarning}}warning{{else}}success{{end}}">
+   {{.Message}}
+</article>
+{{end}}
+
+{{end}}

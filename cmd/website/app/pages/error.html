@@ -1,0 +1,14 @@
+{{if .IsHtmx}}
+{{template "no-layout" .}}
+{{else}}
+{{template "layouts/layout" .}}
+{{end}}
+
+{{define "title"}}Error{{end}}
+{{define "content"}}
+
+<article class="error"
+	{{.Message}}
+</article>
+
+{{end}}

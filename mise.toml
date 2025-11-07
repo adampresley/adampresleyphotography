@@ -1,0 +1,22 @@
+[tools]
+air = "1.63.0"
+go = "1.25"
+gotestsum = "1.13.0"
+localstack = "4.9.2"
+process-compose = "1.75.2"
+python = "3.12"
+aws = { version = "2.31.22", os = "macos" }
+awscli-local = "0.1"
+
+[env]
+AWS_ENDPOINT_URL = "http://localhost:4566"
+AWS_REGION = "us-east-1"
+AWS_ACCESS_KEY_ID = "test"
+AWS_SECRET_ACCESS_KEY = "test"
+AWS_BUCKET = "adampresleyphotography.com"
+
+[tasks.run]
+description = "Run the application"
+run = [
+   "process-compose -f ./process-compose.yaml up",
+]
