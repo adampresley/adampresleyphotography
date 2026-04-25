@@ -7,3 +7,6 @@ tmp
 adampresleyphotography
 *.tar
 mise.local.toml
+.pg/
+pgdata/
+cmd/website/data/*.db

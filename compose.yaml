@@ -5,7 +5,22 @@ services:
       dockerfile: Dockerfile
     env_file:
       - ./.env
+    environment:
+      DSN: host=postgres user=adampresleyphotography password=password dbname=adampresleyphotography port=5432 sslmode=disable
+    depends_on:
+      - postgres
     ports:
       - 8081:8081
+  postgres:
+    image: postgres:17
+    environment:
+      POSTGRES_DB: adampresleyphotography
+      POSTGRES_USER: adampresleyphotography
+      POSTGRES_PASSWORD: password
+    ports:
+      - 5432:5432
     volumes:
-      - ./cmd/website/data:/data
+      - adampresleyphotography-postgres:/var/lib/postgresql/data
+
+volumes:
+  adampresleyphotography-postgres:

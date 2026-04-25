@@ -12,6 +12,9 @@ build: ## Build the application
 run: ## Run the application
 	air
 
+migrate-sqlite: ## Migrate local SQLite client metadata to Postgres
+	cd cmd/website && go run ./migrate-sqlite
+
 docker-create-builder: ## Create a builder for multi-architecture builds. Only needed once per machine
 	docker buildx create --name mybuilder --driver docker-container --bootstrap
 
@@ -21,4 +24,3 @@ docker-build: ## Create a tar of this application
 
 build-linux: ## Builds a Linux binary
 	cd cmd/website && GOOS=linux GOARCH=amd64 CGO_ENABLED=0 go build -ldflags="-X 'main.Version=${VERSION}'" -mod=mod -o adampresleyphotography .
-

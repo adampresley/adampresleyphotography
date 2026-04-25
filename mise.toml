@@ -3,6 +3,7 @@ air = "1.63.0"
 go = "1.25"
 gotestsum = "1.13.0"
 localstack = "4.9.2"
+postgres = "17"
 process-compose = "1.75.2"
 python = "3.12"
 aws = { version = "2.31.22", os = "macos" }
@@ -14,8 +15,14 @@ AWS_REGION = "us-east-1"
 AWS_ACCESS_KEY_ID = "test"
 AWS_SECRET_ACCESS_KEY = "test"
 AWS_BUCKET = "adampresleyphotography.com"
+DSN = "host=localhost user=adampresleyphotography password=password dbname=adampresleyphotography port=5432 sslmode=disable"
+PGDATA = ".pg/data"
+PGHOST = "localhost"
+POSTGRES_DB = "adampresleyphotography"
+POSTGRES_PASSWORD = "password"
+POSTGRES_USER = "adampresleyphotography"
 
-[tasks.run]
+[tasks.start]
 description = "Run the application"
 run = [
    "process-compose -f ./process-compose.yaml up",

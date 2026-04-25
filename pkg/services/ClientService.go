@@ -6,7 +6,7 @@ import (
 	"time"
 
 	"github.com/adampresley/adampresleyphotography/pkg/models"
-	"github.com/rfberaldo/sqlz"
+	"gorm.io/gorm"
 )
 
 type ClientServicer interface {
@@ -15,11 +15,11 @@ type ClientServicer interface {
 }
 
 type ClientServiceConfig struct {
-	DB *sqlz.DB
+	DB *gorm.DB
 }
 
 type ClientService struct {
-	db *sqlz.DB
+	db *gorm.DB
 }
 
 func NewClientService(config ClientServiceConfig) ClientService {
@@ -30,29 +30,13 @@ func NewClientService(config ClientServiceConfig) ClientService {
 
 func (s ClientService) GetAll() ([]models.Client, error) {
 	var (
-		err     error
 		clients []models.Client
 	)
-
-	sql := `
-SELECT
-   c.id
-   , c.created_at
-   , c.updated_at
-   , c.deleted_at
-   , c.password
-   , c.name
-   , c.email
-FROM clients AS c
-WHERE 1=1
-   AND c.deleted_at IS NULL
-ORDER BY c.name
-`
 
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
 	defer cancel()
 
-	if err = s.db.Query(ctx, &clients, sql); err != nil {
+	if err := s.db.WithContext(ctx).Order("name").Find(&clients).Error; err != nil {
 		return nil, fmt.Errorf("error querying for all clients: %w", err)
 	}
 
@@ -60,31 +44,12 @@ ORDER BY c.name
 }
 
 func (s ClientService) GetByPassword(password string) (*models.Client, error) {
-	var (
-		err error
-	)
-
 	result := &models.Client{}
-
-	sql := `
-SELECT
-   c.id
-   , c.created_at
-   , c.updated_at
-   , c.deleted_at
-   , c.password
-   , c.name
-	, c.email
-FROM clients AS c
-WHERE 1=1
-   AND c.deleted_at IS NULL
-   AND c.password=?
-   `
 
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
 	defer cancel()
 
-	if err = s.db.QueryRow(ctx, result, sql, password); err != nil {
+	if err := s.db.WithContext(ctx).Where("password = ?", password).First(result).Error; err != nil {
 		return result, fmt.Errorf("error querying for client by password: %w", err)
 	}
 

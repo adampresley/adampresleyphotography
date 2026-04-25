@@ -7,12 +7,12 @@ import (
 type Album struct {
 	BaseModel
 
-	Name            string
-	PosterImagePath string
-	Path            string
+	Name            string `gorm:"type:varchar(255)"`
+	PosterImagePath string `gorm:"column:poster_image_path;type:text"`
+	Path            string `gorm:"type:text"`
 	ClientID        uint
-	Client          Client `db:"client"`
-	ShootDate       time.Time
-	Favorites       []Favorite
-	PosterYPos      string `db:"poster_y_pos"`
+	Client          Client     `gorm:"foreignKey:ClientID"`
+	ShootDate       time.Time  `gorm:"column:shoot_date"`
+	Favorites       []Favorite `gorm:"foreignKey:AlbumID;references:ID"`
+	PosterYPos      string     `gorm:"column:poster_y_pos;type:text"`
 }

@@ -1,13 +1,7 @@
 package models
 
 import (
-	"database/sql"
-	"time"
+	"gorm.io/gorm"
 )
 
-type BaseModel struct {
-	ID        uint
-	CreatedAt time.Time
-	UpdatedAt time.Time
-	DeletedAt sql.NullTime
-}
+type BaseModel = gorm.Model

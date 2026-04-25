@@ -4,12 +4,9 @@ import (
 	"context"
 	"embed"
 	"encoding/gob"
-	"io/fs"
 	"log/slog"
 	"net/http"
 	"os"
-	"path/filepath"
-	"strings"
 	"time"
 
 	"github.com/adampresley/adamgokit/awsconfig"
@@ -25,9 +22,8 @@ import (
 	"github.com/adampresley/adampresleyphotography/cmd/website/internal/home"
 	"github.com/adampresley/adampresleyphotography/pkg/models"
 	"github.com/adampresley/adampresleyphotography/pkg/services"
-	_ "github.com/glebarez/sqlite"
-	"github.com/rfberaldo/sqlz"
-	"github.com/rfberaldo/sqlz/binds"
+	"gorm.io/gorm"
+	gormlogger "gorm.io/gorm/logger"
 )
 
 var (
@@ -37,16 +33,13 @@ var (
 	//go:embed app
 	appFS embed.FS
 
-	//go:embed sql-migrations
-	sqlMigrationsFs embed.FS
-
 	config configuration.Config
 
 	/* Services */
 	albumService        services.AlbumServicer
 	cacheCreatorService cache.CacheCreator
 	clientService       services.ClientServicer
-	db                  *sqlz.DB
+	db                  *gorm.DB
 	renderer            rendering.TemplateRenderer
 	sessionService      sessions.Session[*models.Client]
 	zipService          services.ZipServicer
@@ -58,11 +51,13 @@ var (
 
 func main() {
 	var (
-		err error
+		dbLogger gormlogger.Interface
+		err      error
 	)
 
 	config = configuration.LoadConfig()
 	setupLogger(&config, Version)
+	dbLogger = setupDbLogger(&config)
 
 	slog.Info("configuration loaded",
 		slog.String("app", appName),
@@ -80,12 +75,7 @@ func main() {
 	/*
 	 * Setup services
 	 */
-	binds.Register("sqlite", binds.BindByDriver("sqlite3"))
-	if db, err = sqlz.Connect("sqlite", config.DSN); err != nil {
-		panic(err)
-	}
-
-	migrateDatabase()
+	db = setupDatabase(&config, dbLogger)
 	gob.Register(&models.Client{})
 
 	cookieStore := sessions.NewCookieStore(config.CookieSecret)
@@ -249,52 +239,6 @@ func main() {
 
 func heartbeat(w http.ResponseWriter, r *http.Request) {
 	httphelpers.TextOK(w, "OK")
-}
-
-func migrateDatabase() {
-	var (
-		err  error
-		dirs []fs.DirEntry
-		b    []byte
-	)
-
-	if dirs, err = sqlMigrationsFs.ReadDir("sql-migrations"); err != nil {
-		panic(err)
-	}
-
-	for _, d := range dirs {
-		if d.IsDir() {
-			continue
-		}
-
-		if strings.HasPrefix(d.Name(), "commit") {
-			if b, err = fs.ReadFile(sqlMigrationsFs, filepath.Join("sql-migrations", d.Name())); err != nil {
-				panic(err)
-			}
-
-			if err = runSqlScript(b); err != nil {
-				if !isIgnorableError(err) {
-					panic(err)
-				}
-			}
-		}
-	}
-}
-
-func runSqlScript(script []byte) error {
-	ctx, cancel := context.WithTimeout(context.Background(), time.Second*30)
-	defer cancel()
-
-	_, err := db.Exec(ctx, string(script))
-	return err
-}
-
-func isIgnorableError(err error) bool {
-	if strings.Contains(err.Error(), "duplicate column") {
-		return true
-	}
-
-	return false
 }
 
 func setupCacheCreator(quit chan os.Signal) {

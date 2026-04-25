@@ -10,10 +10,9 @@ type Config struct {
 	AwsBucket              string `flag:"awsbucket" env:"AWS_BUCKET" default:"adampresleyphotography.com" description:"S3 bucket"`
 	ClientsPhotoFolder     string `flag:"cpf" env:"CLIENTS_PHOTO_FOLDER" default:"clients" description:"S3 folder for clients' photos"`
 	CookieSecret           string `flag:"cookiesecret" env:"COOKIE_SECRET" default:"password" description:"Secret for encoding coodies"`
-	DataMigrationDir       string `flag:"dmd" env:"DATA_MIGRATION_DIR" default:"../../sql-migrations" description:"Migration folder"`
 	DownloadBaseURL        string `flag:"dlb" env:"DOWNLOAD_BASE_URL" default:"http://localhost:8080" description:"Base URL for downloading images"`
 	DownloadExpirationDays int    `flag:"dle" env:"DOWNLOAD_EXPIRATION_DAYS" default:"30" description:"Number of days before images expire in the download directory"`
-	DSN                    string `flag:"dsn" env:"DSN" default:"file:./data/adampresleyphotography.db" description:"Data source name"`
+	DSN                    string `flag:"dsn" env:"DSN" default:"host=localhost user=adampresleyphotography password=password dbname=adampresleyphotography port=5432 sslmode=disable" description:"Postgres data source name"`
 	EmailApiKey            string `flag:"emailapikey" env:"EMAIL_API_KEY" default:"" description:"API key for sending emails"`
 	HomePagePhotoFolder    string `flag:"hppf" env:"HOME_PAGE_PHOTO_FOLDER" default:"home-page" description:"S3 folder for home page photos"`
 	Host                   string `flag:"host" env:"HOST" default:"localhost:8081" description:"The address and port to bind the HTTP server to"`

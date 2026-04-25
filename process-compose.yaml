@@ -1,8 +1,49 @@
 processes:
+  init-db:
+    command: |
+      if [ -f "$PGDATA/PG_VERSION" ]; then
+        echo "Database already initialized."
+        exit 0
+      fi
+
+      echo "Initializing database..."
+      mkdir -p "$(dirname "$PGDATA")"
+      initdb -D "$PGDATA" -U postgres
+
+      echo "Starting temporary postgres for user/db creation..."
+      pg_ctl -D "$PGDATA" -o "-c listen_addresses=localhost -p 5432" -w start
+
+      psql -U postgres -d postgres -c "ALTER ROLE postgres WITH PASSWORD 'postgres';"
+      psql -U postgres -d postgres -c "CREATE USER adampresleyphotography WITH PASSWORD 'password';"
+      psql -U postgres -d postgres -c "CREATE DATABASE adampresleyphotography OWNER adampresleyphotography;"
+
+      echo "Stopping temporary postgres..."
+      pg_ctl -D "$PGDATA" stop
+    availability:
+      restart: "no"
+
+  postgres:
+    command: 'pg_ctl -D "$PGDATA" start -o "-c listen_addresses=localhost -p 5432" -w'
+    namespace: postgres:5432
+    is_daemon: true
+    depends_on:
+      init-db:
+        condition: process_completed_successfully
+    shutdown:
+      command: 'pg_ctl -D "$PGDATA" stop -m fast'
+    availability:
+      restart: "always"
+    readiness_probe:
+      exec:
+        command: "pg_isready -h localhost -p 5432 -d adampresleyphotography"
+
   adampresleyphotography:
     command: air
     namespace: http:8081
     working_dir: ./cmd/website
+    depends_on:
+      postgres:
+        condition: process_healthy
     readiness_probe:
       http_get:
         host: localhost

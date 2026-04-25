@@ -1,6 +1,7 @@
 package clientaccess
 
 import (
+	"errors"
 	"fmt"
 	"io"
 	"log/slog"
@@ -22,7 +23,7 @@ import (
 	"github.com/adampresley/adampresleyphotography/cmd/website/internal/viewmodels"
 	"github.com/adampresley/adampresleyphotography/pkg/models"
 	"github.com/adampresley/adampresleyphotography/pkg/services"
-	"github.com/rfberaldo/sqlz"
+	"gorm.io/gorm"
 )
 
 type ClientAccessControllerConfig struct {
@@ -82,7 +83,7 @@ func (c ClientAccessController) AlbumListPage(w http.ResponseWriter, r *http.Req
 
 	viewData.Client = viewmodels.GetClientFromContext(r)
 
-	if albums, err = c.albumService.GetAlbumList(viewData.Client.ID); err != nil && !sqlz.IsNotFound(err) {
+	if albums, err = c.albumService.GetAlbumList(viewData.Client.ID); err != nil && !errors.Is(err, gorm.ErrRecordNotFound) {
 		slog.Error("error getting album list", "error", err, "clientID", viewData.Client.ID)
 		viewData.IsError = true
 		viewData.Message = "An unexpected error occurred. Please reach out for assistance."
@@ -201,7 +202,7 @@ func (c ClientAccessController) LoginAction(w http.ResponseWriter, r *http.Reque
 
 	client, err = c.clientService.GetByPassword(viewData.ClientCode)
 
-	if err != nil && !sqlz.IsNotFound(err) {
+	if err != nil && !errors.Is(err, gorm.ErrRecordNotFound) {
 		slog.Error("error querying for client information", "error", err)
 		viewData.IsError = true
 		viewData.Message = "An unexpected error occurred. Please reach out for assistance."
@@ -210,7 +211,7 @@ func (c ClientAccessController) LoginAction(w http.ResponseWriter, r *http.Reque
 		return
 	}
 
-	if sqlz.IsNotFound(err) {
+	if errors.Is(err, gorm.ErrRecordNotFound) {
 		viewData.IsWarning = true
 		viewData.Message = "Your password was not correct. Please try again."
 
@@ -433,23 +434,38 @@ func (c ClientAccessController) convertAlbumToViewModel(album *models.Album, get
 			slog.Error("error getting image URLs", "error", err, "clientID", album.ClientID, "albumID", album.ID)
 		}
 
-		for index, thumbnail := range thumbnails.Objects {
-			newImage := internalmodels.Image{
-				ThumbnailURL: thumbnail.Url,
-				OriginalURL:  originals.Objects[index].Url,
-				OriginalPath: fmt.Sprintf("%s/%d/%d/originals/", c.clientPhotoFolder, album.ClientID, album.ID),
-				OriginalKey:  originals.Objects[index].Key,
+		originalsByName := map[string]s3.Object{}
+		for _, original := range originals.Objects {
+			originalsByName[filepath.Base(original.Key)] = original
+		}
+
+		favImagePaths := slices.Map(album.Favorites, func(input models.Favorite, index int) string {
+			return input.ImagePath
+		})
+
+		for _, thumbnail := range thumbnails.Objects {
+			baseImage := filepath.Base(thumbnail.Key)
+			original, ok := originalsByName[baseImage]
+			if !ok {
+				slog.Warn(
+					"skipping thumbnail without matching original",
+					"clientID", album.ClientID,
+					"albumID", album.ID,
+					"thumbnailKey", thumbnail.Key,
+				)
+				continue
 			}
 
-			// Is this image a favorite?
-			uu, _ := url.Parse(originals.Objects[index].Url)
-			baseImage := filepath.Base(uu.Path)
+			newImage := internalmodels.Image{
+				ThumbnailURL: thumbnail.Url,
+				OriginalURL:  original.Url,
+				OriginalPath: fmt.Sprintf("%s/%d/%d/originals/", c.clientPhotoFolder, album.ClientID, album.ID),
+				OriginalKey:  original.Key,
+			}
 
-			favImagePaths := slices.Map(album.Favorites, func(input models.Favorite, index int) string {
-				return input.ImagePath
-			})
-
-			isFav := slices.IsInSlice(baseImage, favImagePaths)
+			uu, _ := url.Parse(original.Url)
+			originalName := filepath.Base(uu.Path)
+			isFav := slices.IsInSlice(originalName, favImagePaths)
 
 			if isFav {
 				newImage.IsFavorite = true

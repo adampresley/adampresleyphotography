@@ -1,12 +1,17 @@
 package main
 
 import (
+	"fmt"
 	"log/slog"
 	"os"
 	"strings"
+	"time"
 
 	"github.com/adampresley/adampresleyphotography/cmd/website/internal/configuration"
+	"gorm.io/gorm/logger"
 )
+
+type DbSlogger struct{}
 
 func setupLogger(config *configuration.Config, version string) {
 	var (
@@ -34,4 +39,32 @@ func setupLogger(config *configuration.Config, version string) {
 
 	logger = slog.New(h)
 	slog.SetDefault(logger)
+}
+
+func setupDbLogger(config *configuration.Config) logger.Interface {
+	return logger.New(
+		DbSlogger{},
+		logger.Config{
+			SlowThreshold:             time.Second * 5,
+			Colorful:                  false,
+			IgnoreRecordNotFoundError: true,
+			ParameterizedQueries:      false,
+			LogLevel:                  getDbLevel(config.LogLevel),
+		},
+	)
+}
+
+func getDbLevel(level string) logger.LogLevel {
+	switch strings.ToLower(level) {
+	case "debug":
+		return logger.Info
+	case "warn":
+		return logger.Warn
+	default:
+		return logger.Error
+	}
+}
+
+func (d DbSlogger) Printf(format string, values ...interface{}) {
+	slog.Info(fmt.Sprintf(format, values...))
 }
