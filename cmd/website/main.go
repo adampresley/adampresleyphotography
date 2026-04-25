@@ -66,6 +66,7 @@ func main() {
 		slog.String("host", config.Host),
 		slog.String("awsEndpointUrl", config.AwsEndpointUrl),
 		slog.String("awsRegion", config.AwsRegion),
+		slog.String("cacheSchedule", config.CacheSchedule.String()),
 	)
 
 	slog.Debug("setting up...")
@@ -243,7 +244,7 @@ func heartbeat(w http.ResponseWriter, r *http.Request) {
 
 func setupCacheCreator(quit chan os.Signal) {
 	go func() {
-		ticker := time.NewTicker(1 * time.Hour)
+		ticker := time.NewTicker(config.CacheSchedule)
 		running := true
 
 		runner := func() {
